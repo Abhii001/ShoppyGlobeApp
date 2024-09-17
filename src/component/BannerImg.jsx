@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 
 const BannerImg = ({ imageSrc, link, alt, title, buttonText }) => (
@@ -14,13 +13,5 @@ const BannerImg = ({ imageSrc, link, alt, title, buttonText }) => (
     </Link>
   </div>
 );
-
-BannerImg.propTypes = {
-  imageSrc: PropTypes.string.isRequired,
-  link: PropTypes.string.isRequired,
-  alt: PropTypes.string.isRequired,
-  title: PropTypes.string.isRequired,
-  buttonText: PropTypes.string.isRequired,
-};
 
 export default BannerImg;

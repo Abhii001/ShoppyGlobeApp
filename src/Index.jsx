@@ -1,8 +1,8 @@
-import { StrictMode, useState, useEffect } from 'react';
+import React, { StrictMode, useState, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import useProductinfo from './utilis/useProductinfo';
-import App from './App'; 
+import App from './App';
 import Error from './component/Error';
 import Carousel from './component/Carousel';
 import Topproduct from './component/Topproduct';
@@ -11,8 +11,8 @@ import ProductFilterAndList from './component/ProductFilterAndList';
 import ProductList from './component/ProductList';
 import ProductBanners from './component/ProductBanners';
 import ProductDetail from './component/ProductDetail';
+import { CartProvider } from './utilis/CartContext';
 
-// Component to display home content
 const AppContent = ({ products }) => {
     return (
         <div className="m-8">
@@ -62,7 +62,7 @@ const Index = () => {
                     element: <ProductDetail products={products} />,  // Product detail
                 },
                 {
-                    path: 'shoppingcart',
+                    path: '/ShoppingCart',
                     element: <ShoppingCart />,  // Shopping cart
                 },
             ],
@@ -71,7 +71,9 @@ const Index = () => {
 
     return (
         <StrictMode>
-            <RouterProvider router={appRouter} />
+            <CartProvider>
+                <RouterProvider router={appRouter} />
+            </CartProvider>
         </StrictMode>
     );
 };

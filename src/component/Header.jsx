@@ -1,13 +1,20 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ShoppingCart, Menu, Favorite, AccountCircle } from '@mui/icons-material';
+import { ShoppingCart, Menu, AccountCircle } from '@mui/icons-material';
+import { useCart } from '../utilis/CartContext'; // Import your CartContext
 
 const Header = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+    // Access cart from context with default value
+    const { cartItems = [] } = useCart();
+
     const handleMenuToggle = () => {
         setIsMenuOpen(!isMenuOpen);
     };
+
+    // Calculate the number of items in cart
+    const cartQuantity = cartItems.length;
 
     return (
         <>
@@ -22,13 +29,17 @@ const Header = () => {
                             {/* Mobile Menu Icons */}
                             <ul className="flex lg:hidden space-x-5 items-center">
                                 <li>
-                                    <button className="flex items-center space-x-1 cursor-pointer relative">
-                                        {/* Cart Icon with Notification Badge */}
-                                        <ShoppingCart className="w-8 text-gray-600" />
-                                        <div className="absolute p-1 -top-3 -right-1 rounded-full w-4 h-4 flex justify-center items-center bg-green-500 text-white">
-                                            <span className="text-xs">5</span>
-                                        </div>
-                                    </button>
+                                    <Link to="/ShoppingCart">
+                                        <button className="flex items-center space-x-1 cursor-pointer relative">
+                                            {/* Cart Icon with Notification Badge */}
+                                            <ShoppingCart className="w-8 text-gray-600" />
+                                            {cartQuantity > 0 && (
+                                                <div className="absolute p-1 -top-3 -right-1 rounded-full w-4 h-4 flex justify-center items-center bg-green-500 text-white">
+                                                    <span className="text-xs">{cartQuantity}</span>
+                                                </div>
+                                            )}
+                                        </button>
+                                    </Link>
                                 </li>
                                 <li>
                                     <button className="flex items-center space-x-1 cursor-pointer" onClick={handleMenuToggle}>
@@ -49,26 +60,17 @@ const Header = () => {
                         <div className="flex gap-5 justify-center items-center">
                             {/* Desktop Menu Items */}
                             <ul className="flex space-x-4 items-center">
-                                <li>
-                                    <Link className="flex items-center space-x-1" to="/shop-wishlist">
-                                        <div className="relative">
-                                            <Favorite className="w-7 text-gray-600" />
-                                            <div className="absolute p-1 -top-[15px] -right-1.5 rounded-full w-5 h-5 flex justify-center items-center bg-green-500 text-white">
-                                                <span className="text-sm ">0</span>
-                                            </div>
-                                        </div>
-                                        <span>Wishlist</span>
-                                    </Link>
-                                </li>
                                 {/* Cart */}
                                 <li className="relative group">
                                     <Link to="/ShoppingCart">
                                         <div className="flex items-center space-x-1 cursor-pointer">
                                             <div className="relative">
                                                 <ShoppingCart className="w-7 text-gray-600" />
-                                                <div className="absolute p-1 -top-[15px] -right-1.5 rounded-full w-5 h-5 flex justify-center items-center bg-green-500 text-white">
-                                                    <span className="text-sm">3</span>
-                                                </div>
+                                                {cartQuantity > 0 && (
+                                                    <div className="absolute p-1 -top-[15px] -right-1.5 rounded-full w-5 h-5 flex justify-center items-center bg-green-500 text-white">
+                                                        <span className="text-sm">{cartQuantity}</span>
+                                                    </div>
+                                                )}
                                             </div>
                                             <span className="text-gray-600">Cart</span>
                                         </div>
@@ -76,7 +78,7 @@ const Header = () => {
                                 </li>
                                 {/* User */}
                                 <li className="relative group">
-                                    <Link to="/">
+                                    <Link to="/user-account">
                                         <div className="flex items-center space-x-1 cursor-pointer">
                                             <AccountCircle className="w-7 text-gray-600" />
                                             <span className="text-gray-600">Account</span>

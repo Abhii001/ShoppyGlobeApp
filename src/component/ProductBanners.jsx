@@ -26,7 +26,7 @@ const banners = [
 
 const ProductBanners = () => (
     <div className="py-4" style={{ opacity: 1, transform: 'none' }}>
-        <div className="w-[85%] max-w-8xl mx-auto px-4 2xl:px-0">
+        <div className="w-[90%] max-w-8xl mx-auto px-4 2xl:px-0">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 top-2">
                 {banners.map((banner, index) => (
                     <BannerImg
@@ -36,6 +36,7 @@ const ProductBanners = () => (
                         alt={banner.alt}
                         title={banner.title}
                         buttonText={banner.buttonText}
+                        className="text-sm sm:text-base md:text-lg"
                     />
                 ))}
             </div>
