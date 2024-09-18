@@ -1,19 +1,23 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@mui/material';
-import { ArrowBack as ArrowBackIcon, ShoppingCart as ShoppingCartIcon, AddShoppingCart as AddShoppingCartIcon, FavoriteBorder as FavoriteBorderIcon } from '@mui/icons-material';
+import {
+    ArrowBack as ArrowBackIcon,
+    ShoppingCart as ShoppingCartIcon,
+    AddShoppingCart as AddShoppingCartIcon,
+    FavoriteBorder as FavoriteBorderIcon,
+} from '@mui/icons-material';
 import { useCart } from '../utilis/CartContext';
 
 const convertToINR = (amountInUSD) => {
-    const conversionRate = 82; // Example rate; update this as needed
+    const conversionRate = 82;
     return (amountInUSD * conversionRate).toFixed(2);
 };
 
 const ProductDetail = ({ products }) => {
     const { productId } = useParams();
     const navigate = useNavigate();
-    const { addToCart } = useCart(); // Use the hook to get addToCart function
-    const product = products.find(p => p.id === parseInt(productId, 10));
+    const product = products.find((p) => p.id === parseInt(productId, 10));
 
     if (!product) return <div>Product not found</div>;
 
@@ -22,14 +26,23 @@ const ProductDetail = ({ products }) => {
     const tags = product.tags || [];
     const reviews = product.reviews || [];
 
-    const handleAddToCart = () => {
-        addToCart(product);
-        // Optionally, show a success message or update state here
+    const { addToCart, increaseQuantity, isInCart, getQuantity } = useCart();
+    const inCart = isInCart(product.id);
+    const quantity = getQuantity(product.id);
+
+    const handleAddToCart = (e) => {
+        e.stopPropagation();
+        if (inCart) {
+            increaseQuantity(product.id);
+        } else {
+            addToCart(product);
+        }
     };
 
     const handleGoToCart = () => {
         navigate('/ShoppingCart');
     };
+
 
     return (
         <div className="container mx-auto px-4 sm:px-8 py-8">
@@ -103,22 +116,24 @@ const ProductDetail = ({ products }) => {
                         </div>
                     </div>
                     <div className="flex items-center gap-4 sm:gap-2 flex-wrap">
-                        <input className="p-2 border-2 border-primary outline-none rounded text-lg max-w-[60px] sm:max-w-[96px]" type="number" defaultValue="1" />
                         <Button
-                            onClick={handleAddToCart}
-                            className="bg-primary text-white flex items-center px-4 py-3 rounded gap-2 hover:bg-green-600 hover:text-white duration-300"
                             startIcon={<AddShoppingCartIcon />}
+                            className={`px-4 py-2 rounded-lg flex items-center gap-2 shadow-md transition duration-300 ease-in-out ${inCart ? 'bg-gray-300 text-gray-600' : 'bg-primary hover:bg-green-600 hover:text-white hover:shadow-lg'}`}
+                            aria-label={inCart ? "Increase quantity" : "Add to cart"}
+                            onClick={handleAddToCart}
                         >
-                            Add to Cart
-                        </Button>
-                        <Button className="px-3.5 py-3.5 rounded hover:bg-green-600 hover:text-white text-gray-400 border border-gray-200 duration-300 hover:-translate-y-1">
-                            <FavoriteBorderIcon />
+                            {inCart ? `Added (${quantity})` : 'Add to Cart'}
                         </Button>
                         <Button
                             onClick={handleGoToCart}
                             className="px-3.5 py-3.5 rounded hover:bg-green-600 hover:text-white text-gray-400 border border-gray-200 duration-300 hover:-translate-y-1"
                         >
                             <ShoppingCartIcon />
+                        </Button>
+                        <Button
+                            className="px-3.5 py-3.5 rounded hover:bg-green-600 hover:text-white text-gray-400 border border-gray-200 duration-300 hover:-translate-y-1"
+                        >
+                            <FavoriteBorderIcon />
                         </Button>
                     </div>
                     <div>

@@ -103,7 +103,7 @@ const ProductFilterAndList = () => {
                                         <span className="text-gray-500">By </span>
                                         <Link className="text-primary" to="/">jahid hasan</Link>
                                     </h6>
-                                    <div className="flex justify-between items-center mt-4">
+                                    <div className="flex flex-col sm:flex-row justify-between items-center mt-4 gap-2">
                                         <div className="flex gap-x-3 items-center">
                                             <h5 className="text-primary text-lg font-semibold">
                                                 <span>{convertToINR(product.price)}</span>
@@ -114,7 +114,7 @@ const ProductFilterAndList = () => {
                                                 </h5>
                                             )}
                                         </div>
-                                        <div className="flex items-center gap-x-2">
+                                        <div className="flex gap-2">
                                             <button
                                                 className={`px-4 py-2 rounded-lg flex items-center gap-2 shadow-md transition duration-300 ease-in-out ${inCart ? 'bg-gray-300 text-gray-600' : 'bg-primary hover:bg-primary-dark hover:shadow-lg'}`}
                                                 aria-label={inCart ? "Increase quantity" : "Add to cart"}

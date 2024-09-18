@@ -1,10 +1,16 @@
 import React from 'react';
 import { useCart } from '../utilis/CartContext';
-import { ArrowBack } from '@mui/icons-material';
+import { ArrowBack, Add, Remove, Delete } from '@mui/icons-material'; // Import icons
 import { Link } from 'react-router-dom';
 
 const ShoppingCart = () => {
   const { cartItems, removeFromCart, updateQuantity } = useCart();
+
+  // Prevent quantity from going below 1 inside updateQuantity function
+  const handleUpdateQuantity = (itemId, newQuantity) => {
+    if (newQuantity < 1) return; // Prevent quantity from going below 1
+    updateQuantity(itemId, newQuantity);
+  };
 
   const calculateSubtotal = () =>
     cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
@@ -12,7 +18,7 @@ const ShoppingCart = () => {
   const shippingEstimate = 5.0; // in USD
   const taxEstimate = 8.32; // in USD
 
-  const convertToINR = (amount) => (amount * 83).toFixed(2);
+  const convertToINR = (amount) => (amount * 83).toFixed(2); // Assuming 1 USD = 83 INR
 
   const subtotal = calculateSubtotal();
   const orderTotal = subtotal + shippingEstimate + taxEstimate;
@@ -22,8 +28,8 @@ const ShoppingCart = () => {
       <div className="py-4">
         <button className="flex items-center text-blue-500 hover:text-blue-700">
           <Link to="/">
-          <ArrowBack className="w-6 h-6" />
-          <span className="text-lg ml-2">Back to Home</span>
+            <ArrowBack className="w-6 h-6" />
+            <span className="text-lg ml-2">Back to Home</span>
           </Link>
         </button>
       </div>
@@ -35,7 +41,7 @@ const ShoppingCart = () => {
               {cartItems.length === 0 ? (
                 <li className="text-gray-500">Your cart is empty</li>
               ) : (
-                cartItems.map(item => (
+                cartItems.map((item) => (
                   <li key={item.id} className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                     <div className="w-full sm:w-40 h-40">
                       <img
@@ -51,16 +57,17 @@ const ShoppingCart = () => {
                       <p className="text-base font-bold text-gray-900">
                         ₹{convertToINR(item.price).toLocaleString()}
                       </p>
-                      <div className="flex items-center border border-gray-300 rounded-lg">
+                      <div className="flex items-center space-x-2">
                         <button
                           type="button"
-                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                          className="text-black bg-gray-100 font-bold py-1 px-3.5 rounded-l hover:bg-green-600 hover:text-white transition"
+                          onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)}
+                          className="p-1 rounded-full bg-gray-100 hover:bg-green-600 hover:text-white transition"
+                          disabled={item.quantity === 1}
                         >
-                          -
+                          <Remove fontSize="small" />
                         </button>
                         <input
-                          className="h-8 w-12 text-center border-l border-r border-gray-300 outline-none"
+                          className="h-8 w-12 text-center border border-gray-300 outline-none"
                           type="number"
                           min="1"
                           readOnly
@@ -68,19 +75,19 @@ const ShoppingCart = () => {
                         />
                         <button
                           type="button"
-                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                          className="text-white bg-green-600 font-bold py-1 px-3.5 rounded-r hover:bg-green-700 transition"
+                          onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
+                          className="p-1 rounded-full bg-green-600 text-white hover:bg-green-700 transition"
                         >
-                          +
+                          <Add fontSize="small" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => removeFromCart(item.id)}
+                          className="ml-4 p-1 rounded-full bg-red-500 text-white hover:bg-red-700 transition"
+                        >
+                          <Delete fontSize="small" />
                         </button>
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => removeFromCart(item.id)}
-                        className="text-red-500 hover:text-red-700 transition"
-                      >
-                        Remove
-                      </button>
                       <p className="text-sm text-gray-500">{item.shippingTime}</p>
                     </div>
                   </li>

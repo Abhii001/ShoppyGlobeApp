@@ -1,17 +1,25 @@
+import React from 'react';
 import { Link } from 'react-router-dom';
 
-const BannerImg = ({ imageSrc, link, alt, title, buttonText }) => (
-  <div className="w-full relative rounded-lg overflow-hidden last:hidden lg:last:block transition-shadow ease-in-out transform hover:scale-105 hover:shadow-2xl">
-    <Link className="w-full block" to={link}>
-      <img className="w-full h-full" src={imageSrc} alt={alt} />
-      <div className="absolute top-10 left-10 max-w-[215px] sm:max-w-[240px] md:max-w-[215px]">
-        <h2 className="text-[18px] sm:text-[20px] lg:text-[25px] text-[#253d4e] font-bold leading-8 mb-5">
-          {title}
-        </h2>
-        <button className="text-white bg-green-600 px-3 py-1 rounded text-sm">{buttonText} →</button>
-      </div>
-    </Link>
-  </div>
+const BannerImg = ({ imageSrc, link, alt, title, buttonText, className }) => (
+    <div className={`relative group overflow-hidden rounded-lg cursor-pointer ${className}`}>
+        <img
+            src={imageSrc}
+            alt={alt}
+            className="w-full h-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
+        />
+        <Link 
+            to={link} 
+            className="absolute inset-0 flex flex-col justify-center items-center bg-black bg-opacity-50 text-white text-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out"
+        >
+            <div className="text-sm sm:text-base md:text-lg font-semibold mb-3 sm:mb-4">
+                {title}
+            </div>
+            <button className="bg-green-600 px-3 py-1.5 rounded-md text-xs sm:text-sm md:text-base">
+                {buttonText}
+            </button>
+        </Link>
+    </div>
 );
 
 export default BannerImg;

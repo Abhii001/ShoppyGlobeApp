@@ -25,9 +25,9 @@ const banners = [
 ];
 
 const ProductBanners = () => (
-    <div className="py-4" style={{ opacity: 1, transform: 'none' }}>
+    <div className="py-4">
         <div className="w-[90%] max-w-8xl mx-auto px-4 2xl:px-0">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 top-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                 {banners.map((banner, index) => (
                     <BannerImg
                         key={index}
