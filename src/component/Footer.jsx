@@ -84,14 +84,14 @@ const Footer = () => {
               <p className="text-sm font-medium text-gray-600 text-center mb-6">From App Store or Google Play</p>
               <div className="flex gap-4 justify-center mb-6">
                 <Link className="transition-transform transform hover:scale-105" to="/play-store">
-                  <img src="src/assets/google-play.jpg" alt="Google Play Store" className="w-24 h-8" />
+                  <img src="/src/assets/google-play.jpg" alt="Google Play Store" className="w-24 h-8" />
                 </Link>
                 <Link className="transition-transform transform hover:scale-105" to="/app-for-ios">
-                  <img src="src/assets/app-store.jpg" alt="App Store" className="w-24 h-8" />
+                  <img src="/src/assets/app-store.jpg" alt="App Store" className="w-24 h-8" />
                 </Link>
               </div>
               <p className="text-sm font-medium text-gray-600 text-center mb-4">Secured Payment Gateway</p>
-              <img className="w-3/4 mx-auto transition-transform transform hover:scale-105" src="src/assets/payment-method.png" alt="Payment Methods" />
+              <img className="w-3/4 mx-auto transition-transform transform hover:scale-105" src="/src/assets/payment-method.png" alt="Payment Methods" />
             </div>
 
           </div>

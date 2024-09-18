@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import useProductInfo from "../utilis/useProductinfo";
+import { debounce } from "lodash";
 
 function SearchBox() {
     const navigate = useNavigate();
@@ -10,11 +11,15 @@ function SearchBox() {
     const [filteredProducts, setFilteredProducts] = useState([]);
 
     useEffect(() => {
-        if (query) {
-            handleSearch(query);
-        } else {
-            setFilteredProducts([]);
-        }
+        const debouncedSearch = debounce(() => {
+            if (query) {
+                handleSearch(query);
+            } else {
+                setFilteredProducts([]);
+            }
+        }, 300); // 300ms delay
+        debouncedSearch();
+        return () => debouncedSearch.cancel();
     }, [query, data]);
 
     const handleSearch = (query) => {
@@ -37,12 +42,16 @@ function SearchBox() {
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        // Clear the input field
+        setQuery('');
+        setShowDropdown(false);
+        setFilteredProducts([]);
     };
 
-    const handleBlur = () => {
-        setTimeout(() => {
-            setShowDropdown(false);
-        }, 100);
+    const handleClear = () => {
+        setQuery('');
+        setShowDropdown(false);
+        setFilteredProducts([]);
     };
 
     if (loading) return <p>Loading...</p>;
@@ -58,10 +67,18 @@ function SearchBox() {
                     value={query}
                     onChange={handleInputChange}
                     onFocus={() => setShowDropdown(true)}
-                    onBlur={handleBlur}
                     aria-live="polite"
                     aria-haspopup="listbox"
                 />
+                {query && (
+                    <button
+                        type="button"
+                        className="text-gray-500 mx-2"
+                        onClick={handleClear}
+                    >
+                        Clear
+                    </button>
+                )}
                 <button
                     className="bg-green-700 text-white font-semibold py-2 px-4 cursor-pointer"
                     type="submit"
@@ -71,32 +88,40 @@ function SearchBox() {
             </form>
 
             {/* Dropdown for filtered products */}
-            {showDropdown && filteredProducts.length > 0 && (
-                <ul className="absolute top-20 z-50 bg-slate-100 rounded-md w-[90vw] sm:w-[70%] max-h-80 overflow-y-auto" role="listbox">
-                    {filteredProducts.map(product => (
-                        <li
-                            key={product.id}
-                            className="p-2 cursor-pointer hover:bg-gray-200"
-                            role="option"
-                            aria-selected={query === product.title}
-                        >
-                            <Link to={`/productdetail/${product.id}`} className="flex items-center">
-                                <img src={product.thumbnail} alt={product.title} className="w-12 h-12 object-cover mr-2" />
-                                <div>
-                                    <h1 className="text-slate-900 text-sm">{product.title}</h1>
-                                    <p className="text-xs opacity-45 font-bold italic">{product.brand}</p>
-                                </div>
-                            </Link>
-
-                        </li>
-                    ))}
-                </ul>
-            )}
-
-            {/* Show a message when no results are found */}
-            {showDropdown && filteredProducts.length === 0 && (
-                <div className="absolute top-20 z-50 bg-slate-100 rounded-md w-[90vw] sm:w-[70%] p-2">
-                    <p className="text-center text-gray-500">No results found</p>
+            {showDropdown && (
+                <div className="absolute top-20 z-50 bg-white rounded-md w-full max-h-80 overflow-y-auto shadow-lg">
+                    {loading ? (
+                        <p className="text-center py-2">Loading...</p>
+                    ) : filteredProducts.length > 0 ? (
+                        <ul>
+                            {filteredProducts.map(product => (
+                                <li
+                                    key={product.id}
+                                    className="p-3 cursor-pointer hover:bg-gray-100 transition-colors duration-200 ease-in-out"
+                                    role="option"
+                                    aria-selected={query === product.title}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setQuery(''); // Clear input field
+                                        setShowDropdown(false); // Hide dropdown
+                                        navigate(`/productdetail/${product.id}`);
+                                    }}
+                                >
+                                    <div className="flex items-center space-x-3">
+                                        <img src={product.thumbnail} alt={product.title} className="w-14 h-14 object-cover rounded-md" />
+                                        <div>
+                                            <h1 className="text-gray-800 text-md font-semibold">{product.title}</h1>
+                                            <p className="text-sm text-gray-600 font-medium">{product.brand}</p>
+                                        </div>
+                                    </div>
+                                </li>
+                            ))}
+                        </ul>
+                    ) : (
+                        <div className="p-2">
+                            <p className="text-center text-gray-500">No results found</p>
+                        </div>
+                    )}
                 </div>
             )}
         </div>

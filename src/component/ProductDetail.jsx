@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@mui/material';
 import {
@@ -15,10 +15,14 @@ const convertToINR = (amountInUSD) => {
 };
 
 const ProductDetail = ({ products }) => {
-    const { productId } = useParams();
-    const navigate = useNavigate();
+    const { productId } = useParams(); // Hook 1
+    const navigate = useNavigate(); // Hook 2
+    const { addToCart, increaseQuantity, isInCart, getQuantity } = useCart(); // Hook 3
+
+    // Find the product based on the productId from the URL params
     const product = products.find((p) => p.id === parseInt(productId, 10));
 
+    // Handle case when the product is not found
     if (!product) return <div>Product not found</div>;
 
     const images = product.images || [];
@@ -26,10 +30,10 @@ const ProductDetail = ({ products }) => {
     const tags = product.tags || [];
     const reviews = product.reviews || [];
 
-    const { addToCart, increaseQuantity, isInCart, getQuantity } = useCart();
     const inCart = isInCart(product.id);
     const quantity = getQuantity(product.id);
 
+    // Function to handle adding the product to the cart
     const handleAddToCart = (e) => {
         e.stopPropagation();
         if (inCart) {
@@ -39,10 +43,10 @@ const ProductDetail = ({ products }) => {
         }
     };
 
+    // Function to navigate to the Shopping Cart page
     const handleGoToCart = () => {
         navigate('/ShoppingCart');
     };
-
 
     return (
         <div className="container mx-auto px-4 sm:px-8 py-8">
@@ -171,9 +175,8 @@ const ProductDetail = ({ products }) => {
                         ) : (
                             reviews.map((review, index) => (
                                 <div key={index} className="review mb-4 p-4 border border-gray-200 rounded">
-                                    <p><strong>{review.reviewerName || 'Anonymous'}</strong> ({review.reviewerEmail || 'N/A'})</p>
-                                    <p>Rating: {review.rating || 'N/A'}</p>
-                                    <p>{review.comment || 'No comment'}</p>
+                                    <p><strong>{review.reviewer}</strong></p>
+                                    <p>{review.comment}</p>
                                 </div>
                             ))
                         )}
