@@ -8,7 +8,9 @@ Currently, two official plugins are available:
 - [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
 server run command
-npm run dev
+cd ShoppyGlobe -  (Go to the project folder)
+npm install - (Install all nodes modules)
+npm run dev - (run this to start the server to see the output on a browser)
 
 ShoppyGlobe Project Overview
 ShoppyGlobe is an e-commerce platform that focuses on providing a variety of products across multiple categories, such as beauty, fragrances, furniture, and groceries. The platform features a user-friendly interface with several key sections designed to enhance the shopping experience.
