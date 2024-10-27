@@ -13,7 +13,7 @@ const ShoppingCart = () => {
   };
 
   const calculateSubtotal = () =>
-    cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
+    cartItems?.reduce((total, item) => total + item.price * item.quantity, 0);
 
   const shippingEstimate = 5.0; // in USD
   const taxEstimate = 8.32; // in USD
@@ -38,10 +38,10 @@ const ShoppingCart = () => {
         <div className="col-span-2">
           <div className="bg-white shadow-md rounded-lg p-6 mb-6">
             <ul className="space-y-6">
-              {cartItems.length === 0 ? (
+              {cartItems?.length === 0 ? (
                 <li className="text-gray-500">Your cart is empty</li>
               ) : (
-                cartItems.map((item) => (
+                cartItems?.map((item) => (
                   <li key={item.id} className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                     <div className="w-full sm:w-40 h-40">
                       <img
