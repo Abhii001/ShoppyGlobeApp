@@ -9,7 +9,7 @@ router.get('/', getProducts);
 // Fetch a product by ID
 router.get('/:id', getProductById);
 
-// Create a new product (Admin access required)
+// Create a new product
 router.post('/', createProduct);
 
 export default router;

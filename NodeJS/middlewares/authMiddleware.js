@@ -14,13 +14,9 @@ export const protect = async (req, res, next) => {
   }
 
   try {
-    // Verify the token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    
-    // Attach the user to the request object (excluding password)
     req.user = await User.findById(decoded.id).select('-password');
-    
-    next(); // Proceed to the next middleware or route handler
+    next();
   } catch (error) {
     res.status(401).json({ message: 'Not authorized, token failed' });
   }

@@ -4,15 +4,71 @@ import jwt from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
 import crypto from 'crypto';
 import User from '../models/Users.js';
+import { google } from 'googleapis';
 
-// Create a transporter for nodemailer
-const transporter = nodemailer.createTransport({
-    service: 'Gmail', // Change to your email service if needed
-    auth: {
-        user: process.env.EMAIL_USER, // Your email
-        pass: process.env.EMAIL_PASS, // Your email password
-    },
+const { OAuth2 } = google.auth;
+
+const oauth2Client = new OAuth2(
+    process.env.CLIENT_ID,
+    process.env.CLIENT_SECRET,
+    'https://developers.google.com/oauthplayground' // or your redirect URI
+);
+
+// Set the credentials
+oauth2Client.setCredentials({
+    refresh_token: process.env.REFRESH_TOKEN,
 });
+
+// Create a transporter
+const createTransporter = async () => {
+    try {
+        // Fetch the access token using the OAuth2 client
+        const accessToken = await oauth2Client.getAccessToken();
+        
+        // Check if the access token is valid
+        if (!accessToken || !accessToken.token) {
+            throw new Error('Access token is empty or invalid');
+        }
+
+        // Create and return the Nodemailer transporter
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                type: 'OAuth2',
+                user: process.env.EMAIL_USER,
+                clientId: process.env.CLIENT_ID,
+                clientSecret: process.env.CLIENT_SECRET,
+                refreshToken: process.env.REFRESH_TOKEN,
+                accessToken: accessToken.token,
+            },
+        });
+
+        return transporter;
+    } catch (error) {
+        console.error('Error creating transporter:', error);
+        throw new Error('Could not create transporter: ' + error.message);
+    }
+};
+
+const sendEmail = async (to, subject, text) => {
+    try {
+        const transporter = await createTransporter();
+        const mailOptions = {
+            from: process.env.EMAIL_USER,
+            to,
+            subject,
+            text,
+        };
+
+        const info = await transporter.sendMail(mailOptions);
+        console.log('Email sent:', info.response);
+    } catch (error) {
+        console.error('Error sending email:', error);
+    }
+};
+
+// Call sendEmail
+sendEmail('avee.abhishek220@gmail.com', 'Test Subject', 'Hello from Nodemailer with OAuth2!');
 
 // Register User
 export const registerUser = async (req, res) => {
@@ -24,40 +80,34 @@ export const registerUser = async (req, res) => {
     const { firstName, lastName, email, password } = req.body;
 
     try {
-        // Check if the user already exists
         let user = await User.findOne({ email });
         if (user) {
             if (user.isVerified) {
                 return res.status(400).json({ message: 'User already registered and verified' });
             }
 
-            // Regenerate the verification token if the user is not verified
             user.verificationToken = crypto.randomBytes(32).toString('hex');
             await user.save();
         } else {
-            // Hash the password
-            const hashedPassword = await bcrypt.hash(password, 10);
-
-            // Create a verification token
             const verificationToken = crypto.randomBytes(32).toString('hex');
-
-            // Create a new user
-            user = new User({ firstName, lastName, email, password: hashedPassword, verificationToken });
+            user = new User({
+                firstName,
+                lastName,
+                email,
+                password,
+                verificationToken,
+            });
             await user.save();
         }
 
-        // Send verification email
-        const verificationUrl = `http://localhost:2100/api/verify-email/${user.verificationToken}`; // Update for production
-        try {
-            await transporter.sendMail({
-                to: email,
-                subject: 'Email Verification',
-                html: `<p>Click <a href="${verificationUrl}">here</a> to verify your email.</p>`,
-            });
-        } catch (error) {
-            console.error('Error sending verification email:', error);
-            return res.status(500).json({ message: 'Error sending verification email', error: error.message });
-        }
+        const transporter = await createTransporter();
+        const verificationUrl = `http://localhost:2100/api/verify-email/${user.verificationToken}`;
+        await transporter.sendMail({
+            from: process.env.EMAIL_USER,
+            to: email,
+            subject: 'Email Verification',
+            html: `<p>Click <a href="${verificationUrl}">here</a> to verify your email.</p>`,
+        });
 
         res.status(201).json({ message: 'User registered successfully. Please check your email to verify your account.' });
     } catch (error) {
@@ -66,7 +116,7 @@ export const registerUser = async (req, res) => {
     }
 };
 
-// Email verification
+// Email Verification
 export const verifyEmail = async (req, res) => {
     const { token } = req.params;
 
@@ -76,9 +126,8 @@ export const verifyEmail = async (req, res) => {
             return res.status(400).json({ message: 'Invalid verification token' });
         }
 
-        // Mark user as verified
         user.isVerified = true;
-        user.verificationToken = undefined; // Clear the verification token
+        user.verificationToken = undefined; // Clear verification token
         await user.save();
 
         res.status(200).json({ message: 'Email verified successfully!' });
@@ -98,19 +147,16 @@ export const loginUser = async (req, res) => {
     const { email, password } = req.body;
 
     try {
-        // Find the user by email
         const user = await User.findOne({ email });
         if (!user) {
             return res.status(400).json({ message: 'Invalid credentials' });
         }
 
-        // Check if the password matches
-        const isMatch = await bcrypt.compare(password, user.password);
+        const isMatch = await user.comparePassword(password);
         if (!isMatch) {
             return res.status(400).json({ message: 'Invalid credentials' });
         }
 
-        // Generate JWT
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
         res.status(200).json({ token });
     } catch (error) {
@@ -119,7 +165,6 @@ export const loginUser = async (req, res) => {
     }
 };
 
-// Exporting all controller functions
 export default {
     registerUser,
     verifyEmail,
