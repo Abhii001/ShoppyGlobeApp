@@ -1,93 +1,52 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { createContext, useContext, useState } from 'react';
 
 export const CartContext = createContext();
 
-export const CartProvider = ({ children, isAuthenticated }) => {
+export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
 
-  // Fetch cart items on component mount
-  useEffect(() => {
-    const fetchCart = async () => {
-        if (!isAuthenticated) return; // Exit early if not authenticated
-
-        try {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                console.error('No token found. User may not be authenticated.');
-                return;
-            }
-
-            const response = await axios.get('http://localhost:2100/api/cart', {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-                withCredentials: true,
-            });
-
-            console.log('Cart data:', response.data);
-            setCartItems(response.data.items); // Assuming response.data.items contains cart items
-        } catch (error) {
-            console.error('Error fetching cart:', error);
-            if (error.response && error.response.status === 401) {
-                console.error('Unauthorized access. Redirecting to login...');
-                // Handle redirection or state update for unauthorized access
-            }
-        }
-    };
-
-    fetchCart();
-}, [isAuthenticated]); 
-
-
-  const addToCart = async (product) => {
-    try {
-      const response = await axios.post('http://localhost:2100/api/cart', {
-        productId: product.id,
-        quantity: 1,
-      });
-      setCartItems(response.data.items);
-      console.log("Item added to cart:", response.data);
-    } catch (error) {
-      console.error("Error adding to cart:", error);
-    }
+  const addToCart = (item) => {
+    setCartItems((prevItems) => {
+      const existingItem = prevItems.find(cartItem => cartItem.id === item.id);
+      if (existingItem) {
+        return prevItems.map(cartItem =>
+          cartItem.id === item.id
+            ? { ...cartItem, quantity: (cartItem.quantity || 1) + 1 }
+            : cartItem
+        );
+      } else {
+        return [...prevItems, { ...item, quantity: 1 }];
+      }
+    });
   };
 
-  // Remove a product from the cart
-  const removeFromCart = async (id) => {
-    try {
-      const response = await axios.delete(`http://localhost:2100/api/cart/${id}`);
-      setCartItems(response.data.items);
-    } catch (error) {
-      console.error('Error removing from cart:', error);
-    }
+  const removeFromCart = (id) => {
+    setCartItems((prevItems) => prevItems.filter(item => item.id !== id));
   };
 
-  const isInCart = (productId) => {
-    return cartItems?.some(item => item.productId === productId) || false;
+  const isInCart = (id) => {
+    return cartItems.some(item => item.id === id);
   };
 
-  
-  const increaseQuantity = async (id) => {
-    const item = cartItems.find(item => item.productId === id);
-    if (item) {
-      updateQuantity(id, item.quantity + 1);
-    }
+  const increaseQuantity = (id) => {
+    setCartItems((prevItems) => {
+      return prevItems.map(item =>
+        item.id === id ? { ...item, quantity: (item.quantity || 1) + 1 } : item
+      );
+    });
   };
 
-  const updateQuantity = async (productId, newQuantity) => {
-    try {
-      const response = await axios.put(`http://localhost:2100/api/cart/${productId}`, { quantity: newQuantity });
-      setCartItems(response.data.items); 
-    } catch (error) {
-      console.error('Error updating cart quantity:', error);
-    }
+  const updateQuantity = (itemId, newQuantity) => {
+    setCartItems((prevItems) =>
+      prevItems.map((item) =>
+        item.id === itemId ? { ...item, quantity: newQuantity } : item
+      )
+    );
   };
 
-  
-  const getQuantity = (productId) => {
-    const item = cartItems?.find(item => item.productId === productId);
-    return item ? item.quantity : 0;
+  const getQuantity = (id) => {
+    const item = cartItems.find(item => item.id === id);
+    return item ? item.quantity || 0 : 0;
   };
 
   return (
@@ -99,7 +58,7 @@ export const CartProvider = ({ children, isAuthenticated }) => {
 
 export const useCart = () => {
   const context = useContext(CartContext);
-  if (!context) {
+  if (context === undefined) {
     throw new Error('useCart must be used within a CartProvider');
   }
   return context;

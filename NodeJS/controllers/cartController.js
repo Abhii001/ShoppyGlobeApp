@@ -1,6 +1,5 @@
 import Cart from '../models/Cart.js';
 
-
 // Get cart items for a user
 export const getCartItems = async (req, res) => {
     const userId = req.user._id; // Extracted from JWT token by protect middleware
@@ -12,6 +11,7 @@ export const getCartItems = async (req, res) => {
         }
         res.status(200).json(cart);
     } catch (error) {
+        console.error('Error retrieving cart items:', error);
         res.status(500).json({ message: 'Error retrieving cart items', error: error.message });
     }
 };
@@ -46,6 +46,7 @@ export const addToCart = async (req, res) => {
         const savedCart = await cart.save();
         res.status(200).json({ message: 'Item added to cart', cart: savedCart });
     } catch (error) {
+        console.error('Error adding to cart:', error);
         res.status(500).json({ message: 'Error adding to cart', error: error.message });
     }
 };

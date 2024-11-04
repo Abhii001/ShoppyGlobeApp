@@ -3,25 +3,28 @@ import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@mui/material';
 import { motion } from 'framer-motion';
+import { useUser } from '../utilis/userContext';
 
-const Login = ({ setIsAuthenticated }) => {
+const Login = () => {
+    const { login } = useUser();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
 
-    const handleLogin = async (credentials) => {
+    const handleLogin = async (e) => {
+        e.preventDefault();
         try {
-            const response = await axios.post('http://localhost:2100/api/login', credentials);
-            const { token } = response.data;
+            const response = await axios.post('http://localhost:2100/api/login', { email, password });
+            const { token, user } = response.data;
             localStorage.setItem('token', token);
-            setIsAuthenticated(true);
-        } catch (error) {
-            console.error('Error logging in:', error);
+            login(user); // Store user info in context
+            navigate('/'); // Redirect to the main app or home page
+        } catch (err) {
+            setError('Invalid email or password. Please try again.');
+            console.error('Error logging in:', err);
         }
     };
-    
-
 
     return (
         <div className="relative flex flex-col justify-center items-center min-h-screen p-6 bg-gradient-to-r from-blue-200 via-purple-200 to-pink-200">
@@ -61,9 +64,7 @@ const Login = ({ setIsAuthenticated }) => {
                 </form>
                 <p className="mt-4 text-center">
                     Don't have an account?{' '}
-                    <Link to="/signup" className="text-blue-600 hover:underline">
-                        Signup
-                    </Link>
+                    <Link to="/signup" className="text-blue-600 hover:underline">Signup</Link>
                 </p>
             </motion.div>
         </div>

@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useNavigate, Link } from 'react-router-dom'; // Make sure to import Link
+import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@mui/material';
 import { motion } from 'framer-motion';
+import { useUser } from '../utilis/userContext';
 
-const Signup = ({ setIsAuthenticated, toggleSignup }) => {
+const Signup = () => {
+    const { login } = useUser();
     const [formData, setFormData] = useState({ email: '', password: '', firstName: '', lastName: '' });
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
@@ -13,12 +15,13 @@ const Signup = ({ setIsAuthenticated, toggleSignup }) => {
     const handleSignup = async (e) => {
         e.preventDefault();
         try {
-            await axios.post('http://localhost:2100/api/signup', formData);
+            const response = await axios.post('http://localhost:2100/api/signup', formData);
             setSuccess('Signup successful! Redirecting to login...');
             setTimeout(() => {
-                setIsAuthenticated(true); // Set authenticated state if needed
+                const { user } = response.data; // Assuming the API returns user info
+                login(user); // Log in the user
                 navigate('/login');
-            }, 1500); // Redirect to login
+            }, 1500);
         } catch (err) {
             setError('Signup failed. Please check your inputs and try again.');
         }
@@ -88,9 +91,7 @@ const Signup = ({ setIsAuthenticated, toggleSignup }) => {
                 </form>
                 <p className="mt-4 text-center">
                     Already have an account?{' '}
-                    <Link to="/login" className="text-blue-600 hover:underline">
-                        Login
-                    </Link>
+                    <Link to="/login" className="text-blue-600 hover:underline">Login</Link>
                 </p>
             </motion.div>
         </div>

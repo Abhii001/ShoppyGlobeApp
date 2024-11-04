@@ -2,15 +2,25 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ShoppingCart, Menu, AccountCircle, Favorite } from '@mui/icons-material';
 import { useCart } from '../utilis/CartContext';
+import { useUser } from '../utilis/userContext';
 import SearchBox from './SearchBox';
+import { Button } from '@mui/material';
 
 const Header = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
     const { cartItems = [] } = useCart();
     const cartQuantity = cartItems.reduce((total, item) => total + item.quantity, 0);
 
+    const { user, logout } = useUser();
+    const isAuthenticated = !!user; 
+
     const handleMenuToggle = () => {
         setIsMenuOpen(!isMenuOpen);
+    };
+
+    const handleUserMenuToggle = () => {
+        setIsUserMenuOpen(!isUserMenuOpen);
     };
 
     return (
@@ -80,14 +90,46 @@ const Header = () => {
                                     </div>
                                 </Link>
                             </li>
-                            {/* User */}
+                            {/* User Menu */}
                             <li className="relative group">
-                                <Link to="/user-account">
-                                    <div className="flex items-center space-x-1 cursor-pointer">
-                                        <AccountCircle className="w-7 text-gray-600" />
-                                        <span className="text-gray-600">Account</span>
+                                <button className="flex items-center space-x-1 cursor-pointer" onClick={handleUserMenuToggle}>
+                                    <AccountCircle className="w-7 text-gray-600" />
+                                    <span className="text-gray-600">Account</span>
+                                </button>
+                                {/* User Dropdown Menu */}
+                                {isUserMenuOpen && (
+                                    <div className="absolute bg-white w-32 mt-2 rounded shadow-lg z-50">
+                                        <ul className="flex flex-col">
+                                            <li>
+                                                <Link
+                                                    to="/user-account"
+                                                    className="block px-4 py-2 text-gray-600 hover:bg-gray-200"
+                                                >
+                                                    {user?.firstName || 'Account'}
+                                                </Link>
+                                            </li>
+                                            {isAuthenticated ? (
+                                                <li>
+                                                    <button
+                                                        onClick={logout}
+                                                        className="block w-full text-left px-4 py-2 text-gray-600 hover:bg-gray-200"
+                                                    >
+                                                        Logout
+                                                    </button>
+                                                </li>
+                                            ) : (
+                                                <li>
+                                                    <Link
+                                                        to="/login"
+                                                        className="block px-4 py-2 text-gray-600 hover:bg-gray-200"
+                                                    >
+                                                        Login
+                                                    </Link>
+                                                </li>
+                                            )}
+                                        </ul>
                                     </div>
-                                </Link>
+                                )}
                             </li>
                         </ul>
                     </div>
